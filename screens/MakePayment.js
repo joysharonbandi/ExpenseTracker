@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  NativeModules,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import QRCodeScanner from 'react-native-qrcode-scanner';
@@ -13,12 +14,13 @@ import {RNCamera} from 'react-native-camera';
 import {Picker} from '@react-native-picker/picker';
 import {UserContext} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export default function MakePayment() {
-  const {obj, setObj} = useContext(UserContext);
+export default function MakePayment({navigation}) {
+  const {obj, setObj, input1, setInput1, input, setInput} =
+    useContext(UserContext);
   const [selectedValue, setSelectedValue] = useState('grocery');
-  const [input, setInput] = useState('');
-  const [input1, setInput1] = useState('');
+
   const [reactiv, setReactiv] = useState();
+  const UPI = NativeModules.UPI;
 
   // const [obj, setObj] = useState({});
 
@@ -109,7 +111,8 @@ export default function MakePayment() {
       //   err => console.error('An error occured', err),
       //   Submit(),
       // );
-      Linking.openURL(url).then(e => console.log(e));
+      // Linking.openURL(url).then(e => console.log(e));
+      //
     }
   };
   // console.log(reactiv.reactivate());
@@ -119,83 +122,51 @@ export default function MakePayment() {
   //     console.log(reactiv);
   //   }
   // }, [reactiv]);
+
+  const openLink = async () => {
+    // let {amount} = this.state;
+    try {
+      let UpiUrl =
+        'upi://pay?pa=7013991532@ybl&pn=dhaval&tr=kdahskjahs27575fsdfasdas&am=' +
+        1 +
+        '&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp';
+      let response = await UPI.openLink(UpiUrl);
+      console.log(response); //however you want to handle response
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return (
-    <View
-      style={{flex: 1, justifyContent: 'space-between', alignItems: 'center'}}>
-      <View style={{flex: 0.5}}>
-        <QRCodeScanner
-          ref={node => {
-            // console.log(node.reactivate(), 'kkii')
-            setReactiv(node);
-          }}
-          reactivate={true}
-          reactivateTimeout={10}
-          onRead={onSuccess}
-          // flashMode={RNCamera.Constants.FlashMode.torch}
-          cameraStyle={styles.camera}
-          cameraContainerStyle={
-            <View>
-              <Text>jyjyjejy</Text>
-            </View>
-          }
-          // topContent={
-          //   <Text style={styles.centerText}>
-          //     Go to <Text style={styles.textBold}>wikipedia.org/wiki/QR_code</Text>{' '}
-          //     on your computer and scan the QR code.
-          //   </Text>
-          // }
-          // bottomContent={
-          //   <View style={{flex: 2, justifyContent: 'space-between'}}>
-          //     <View style={{borderWidth: 1}}>
-          //       <Picker
-          //         selectedValue={selectedValue}
-          //         style={{height: 50, width: 200}}
-          //         enabled={true}
-          //         mode={'dropdown'}
-          //         onValueChange={(itemValue, itemIndex) =>
-          //           setSelectedValue(itemValue)
-          //         }>
-          //         <Picker.Item label="grocery" value="grocery" />
-          //         <Picker.Item label="Movies" value="Movies" />
-          //         <Picker.Item label="Food" value="Food" />
-          //         <Picker.Item label="Travel" value="Travel" />
-          //       </Picker>
-          //     </View>
-          //     <View style={styles.inputbox1}>
-          //       <TextInput
-          //         style={{borderWidth: 2, width: 200}}
-          //         placeholder="description"
-          //         onChangeText={val => {
-          //           setInput(val);
-          //         }}></TextInput>
-          //     </View>
-          //     <View style={styles.inputbox2}>
-          //       <TextInput
-          //         keyboardType="numeric"
-          //         style={{borderWidth: 2, width: 200}}
-          //         placeholder="Enter Money"
-          //         onChangeText={val => {
-          //           setInput1(val);
-          //         }}></TextInput>
-          //     </View>
-          //     <View style={{flex: 0.5}}>
-          //       <TouchableOpacity
-          //         onPress={() => {
-          //           setReactiv(true);
-          //         }}>
-          //         <View>
-          //           <Text>Submit</Text>
-          //         </View>
-          //       </TouchableOpacity>
-          //     </View>
-          //   </View>
-        />
-      </View>
-      <View style={{flex: 0.25}}>
-        <View style={{borderWidth: 1, width: 200}}>
+    <View style={{flex: 1, backgroundColor: '#42224A'}}>
+      <Text
+        style={{
+          flex: 0.15,
+          textAlignVertical: 'center',
+          fontSize: 30,
+          fontWeight: '500',
+          color: 'white',
+        }}>
+        Make Payment
+      </Text>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'white',
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          padding: 10,
+        }}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+          }}>
+          category
+        </Text>
+        <View style={{borderBottomWidth: 2}}>
           <Picker
             selectedValue={selectedValue}
-            style={{height: 50, width: 200}}
+            style={{height: 50, width: '100%'}}
             enabled={true}
             mode={'dropdown'}
             onValueChange={(itemValue, itemIndex) =>
@@ -207,23 +178,55 @@ export default function MakePayment() {
             <Picker.Item label="Travel" value="Travel" />
           </Picker>
         </View>
-      </View>
-      <View style={styles.inputbox1}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            marginTop: 10,
+            marginBottom: 5,
+          }}>
+          description
+        </Text>
         <TextInput
-          style={{borderWidth: 2, width: 200}}
+          style={{borderBottomWidth: 2, width: '100%'}}
           placeholder="description"
           onChangeText={val => {
             setInput(val);
           }}></TextInput>
-      </View>
-      <View style={styles.inputbox2}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            marginTop: 10,
+            marginBottom: 5,
+          }}>
+          Amount
+        </Text>
         <TextInput
           keyboardType="numeric"
-          style={{borderWidth: 2, width: 200}}
+          style={{borderBottomWidth: 2, width: '100%'}}
           placeholder="Enter Money"
           onChangeText={val => {
             setInput1(val);
           }}></TextInput>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('QRcode', {
+              selectedValue: selectedValue,
+              input: input,
+              input1: input1,
+            });
+          }}
+          style={{
+            marginTop: 20,
+            padding: 15,
+            backgroundColor: 'lightcyan',
+            borderRadius: 10,
+          }}>
+          <Text style={{textAlign: 'center', fontWeight: '500'}}>
+            Continue to Pay
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

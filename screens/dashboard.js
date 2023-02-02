@@ -8,6 +8,7 @@ import {
   Modal,
   FlatList,
   TouchableWithoutFeedback,
+  ProgressBarAndroidBase,
 } from 'react-native';
 import React, {useState} from 'react';
 import {
@@ -18,48 +19,108 @@ import {
   ContributionGraph,
   StackedBarChart,
 } from 'react-native-chart-kit';
+import * as Progress from 'react-native-progress';
 
 import plus from '../assests/add.png';
 import {disabled} from 'deprecated-react-native-prop-types/DeprecatedTextPropTypes';
 import {useContext, useEffect} from 'react';
 import {UserContext} from '../App';
-import {counter} from '../src/Function';
+import {counter, mainFun} from '../src/Function';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Graph from '../src/components/graph/graph';
+import ProgressBar from '../src/components/ProgressBar';
 export default function Dashboard({navigation}) {
-  const {obj, setObj, recent} = useContext(UserContext);
+  const {
+    obj,
+    setObj,
+    recent,
+    setRecent,
+    totalSum,
+    setTotal,
+    credit,
+    setCredit,
+  } = useContext(UserContext);
   const [modalVisable, setModalVisable] = useState(false);
   const [grocery, setGrocery] = useState(0);
+  const [data, setData] = useState({});
+  console.log({data});
+  // console.log(data, 'datat');
 
-  console.log(grocery);
+  const unicodes = {
+    grocery: '🛒',
+    Movies: '🎥',
+    Food: '🍔',
+    Travel: '🚆',
+    paymentType: '💸',
+  };
+  const colors = {
+    grocery: 'lightblue',
+    Movies: '#F07470',
+    Food: 'yellow',
+    Travel: 'lightgreen',
+    paymentType: 'green',
+  };
+
+  // const cost = counter('5 - 7 - 2022', 'grocery', obj) | 0;
+  // const li = mainFun(obj);
+  // console.log({cost});
+  // console.log(grocery);
 
   const getData = async () => {
     const value = await AsyncStorage.getItem('@storage_Key');
+    const value1 = await AsyncStorage.getItem('@storage_Key1');
+    const totalAmount = await AsyncStorage.getItem('totalAmount');
+    const credit = await AsyncStorage.getItem('credit');
     const a = JSON.parse(value);
-    console.log(a);
+    const recentObj = JSON.parse(value1);
+
+    // console.log(a);
     if (value != null) {
       setObj(a);
+    }
+    if (value1 != null) {
+      setRecent(recentObj);
+    }
+    if (totalSum != null) {
+      setTotal(JSON.parse(totalAmount));
+    }
+    if (credit != null) {
+      setCredit(JSON.parse(credit));
     }
   };
 
   useEffect(() => {
     getData();
+    // setData(mainFun(obj));
   }, []);
+  // console.log(JSON.stringify(obj));
 
   useEffect(() => {
-    if (obj) {
-      const grocery = counter('grocery', obj);
-      setGrocery(grocery);
-      // var movies = counter('Movies', obj);
-      console.log(obj);
-      console.log(recent);
-    }
-  });
-  console.log(grocery);
+    // if (obj) {
+    //   const grocery = counter('grocery', obj);
+    //   setGrocery(grocery);
+    //   // var movies = counter('Movies', obj);
+    //   // console.log(obj);
+    //   // console.log(recent);
+    // }
+    setData(mainFun(obj));
+  }, [obj]);
+
+  // console.log({data});
   return (
     <View style={styles.main}>
-      <View>
-        <Text>Bezier Line Chart</Text>
-        <LineChart
+      {/* <View>
+        <Text>Bezier Line Chart</Text> */}
+      <View style={{flex: 0.45}}>
+        <Graph
+          everyDayDetails={{
+            array: {
+              data,
+            },
+          }}
+        />
+      </View>
+      {/* <LineChart
           data={{
             labels: ['Grocery', 'Movies'],
             datasets: [
@@ -94,8 +155,8 @@ export default function Dashboard({navigation}) {
             marginVertical: 8,
             borderRadius: 16,
           }}
-        />
-        {/* <PieChart
+        /> */}
+      {/* <PieChart
           data={data}
           // width={screenWidth}
           height={220}
@@ -121,7 +182,7 @@ export default function Dashboard({navigation}) {
           center={[10, 50]}
           absolute
         /> */}
-      </View>
+      {/* </View> */}
       <Modal transparent={true} visible={modalVisable}>
         <TouchableOpacity
           onPress={() => {
@@ -197,21 +258,79 @@ export default function Dashboard({navigation}) {
           {/* </View> */}
         </TouchableOpacity>
       </Modal>
-      <View style={{flex: 1}}>
-        <Text style={{fontSize: 40}}>Recent</Text>
+      <TouchableOpacity
+        style={{paddingHorizontal: 10}}
+        onPress={() => {
+          navigation.navigate('TotalDetails', {totalSum, credit});
+        }}>
+        <Text>Total Amount Available</Text>
+        {/* <ProgressBarAndroidBase /> */}
+        {/* <Progress.Bar
+          progress={0.9}
+          width={null}
+          height={10}
+          animated={true}
+          indeterminateAnimationDuration={1000}
+          // indeterminate={true}
+          animationType={'spring'}
+        /> */}
+        <ProgressBar total={totalSum} credit={credit} />
+        <Text>{totalSum}</Text>
+      </TouchableOpacity>
+      <View
+        style={{
+          flex: 0.56,
+          borderRadius: 20,
+          borderBottomWidth: 0,
+          padding: 10,
+          margin: 10,
+          backgroundColor: 'white',
+        }}>
+        <Text style={{fontSize: 35}}>Recent</Text>
 
         <FlatList
           data={recent}
-          renderItem={item => (
-            <View>
-              {console.log('inside', item['item'])}
-              <View
-                style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                <Text>{item['item']['category']}</Text>
-                <Text>{item['item']['spendings']}</Text>
-              </View>
-            </View>
-          )}
+          renderItem={item => {
+            console.log(item.item.paymentType);
+            return (
+              <TouchableOpacity
+                style={{
+                  paddingVertical: 10,
+                  marginBottom: 10,
+                  borderRadius: 20,
+                  // borderWidth: 1,
+                  // borderColor: 'black',
+                  backgroundColor:
+                    colors[item['item']['category']] || colors['paymentType'],
+                }}
+                onPress={() => {
+                  navigation.navigate('Details', item.item);
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                  }}>
+                  <Text>
+                    {unicodes[item['item']['category']] || unicodes.paymentType}
+                  </Text>
+                  {item.item.paymentType === 'debit' ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <Text>{item['item']['category']}</Text>
+                    </View>
+                  ) : (
+                    <Text>Credit</Text>
+                  )}
+
+                  <Text>{item['item']['spendings']}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
         />
       </View>
       <View style={{position: 'absolute', bottom: 10, right: 0}}>
@@ -229,6 +348,8 @@ export default function Dashboard({navigation}) {
 const styles = StyleSheet.create({
   main: {
     flex: 1,
+    justifyContent: 'space-between',
+    backgroundColor: '#ededed',
     // backgroundColor: 'pink',
     // justifyContent: 'flex-end',
   },

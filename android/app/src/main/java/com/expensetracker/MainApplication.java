@@ -1,4 +1,5 @@
 package com.expensetracker;
+import com.upi.payment.UpiPaymentPackage;
 
 import android.app.Application;
 import android.content.Context;
@@ -25,7 +26,10 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
           @SuppressWarnings("UnnecessaryLocalVariable")
+          
           List<ReactPackage> packages = new PackageList(this).getPackages();
+          packages.add(new UPIPackage());
+
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           return packages;
@@ -40,6 +44,8 @@ public class MainApplication extends Application implements ReactApplication {
   private final ReactNativeHost mNewArchitectureNativeHost =
       new MainApplicationReactNativeHost(this);
 
+ 
+
   @Override
   public ReactNativeHost getReactNativeHost() {
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
@@ -48,6 +54,8 @@ public class MainApplication extends Application implements ReactApplication {
       return mReactNativeHost;
     }
   }
+
+ 
 
   @Override
   public void onCreate() {
