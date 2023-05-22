@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, Image} from 'react-native';
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -11,6 +11,9 @@ import Details from '../screens/Details';
 import TotalDetails from '../screens/TotalDetails';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Transaction from '../screens/Transaction';
+import Login from '../screens/Login';
+import PhoneLogin from '../screens/PhoneLogin';
+import Profile from '../screens/Profile';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 export default function homeStack() {
@@ -20,8 +23,13 @@ export default function homeStack() {
     // </View>
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
+        {/* <Stack.Screen name="login" component={Login} /> */}
+        <Stack.Screen
+          name="phone"
+          component={PhoneLogin}
+          options={{headerShown: 'true'}}
+        />
         <Stack.Screen name="Home" component={Home} />
-        {/* <Stack.Screen name="DashBoard" component={Dashboard} /> */}
 
         <Stack.Screen name="AddExpense" component={AddExpense} />
         <Stack.Screen name="MakePayment" component={MakePayment} />
@@ -36,9 +44,27 @@ export default function homeStack() {
 
 function Home() {
   return (
-    <Tab.Navigator screenOptions={{headerShown: false}}>
-      <Tab.Screen name="Dashoboard" component={Dashboard} />
+    <Tab.Navigator
+      screenOptions={({route}) => ({
+        headerShown: false,
+
+        tabBarIcon: ({}) => {
+          let iconName = '';
+          if (route.name === 'DashBoard') {
+            iconName = require('../assests/dashboard.png');
+          }
+          if (route.name === 'Transaction') {
+            iconName = require('../assests/transaction.png');
+          }
+          if (route.name === 'Profile') {
+            iconName = require('../assests/person.png');
+          }
+          return <Image source={iconName} style={{width: 25, height: 25}} />;
+        },
+      })}>
+      <Tab.Screen name="DashBoard" component={Dashboard} />
       <Tab.Screen name="Transaction" component={Transaction} />
+      <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
 }

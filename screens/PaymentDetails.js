@@ -6,8 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function PaymentDetails({route, navigation}) {
   const {obj, setObj, recent, setRecent} = useContext(UserContext);
   const {selectedValue, input, input1} = route.params['obj'];
-  console.log(route.params['obj']);
-  console.log(selectedValue);
 
   const Submit = () => {
     const d = new Date();
@@ -44,22 +42,19 @@ export default function PaymentDetails({route, navigation}) {
         spendings: input1,
       },
     ]);
-    console.log(obj1);
   };
 
   const storeData = async obj => {
     try {
-      console.log('jjoyoo', recent);
       const jsonValue = JSON.stringify(obj);
       const jsonValue1 = JSON.stringify(recent);
-      console.log('aa', jsonValue);
+
       AsyncStorage.setItem('@storage_Key', jsonValue);
       AsyncStorage.setItem('@storage_Key1', jsonValue1);
       // navigation.navigate('Dashboard');
       // AsyncStorage.setItem('@storage_Key1', jsonValue1);
     } catch (e) {
       // saving error
-      console.log(e);
     }
   };
 

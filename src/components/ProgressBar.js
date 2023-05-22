@@ -2,14 +2,13 @@ import {View, Text, StyleSheet} from 'react-native';
 import React from 'react';
 
 export default function ProgressBar({total, credit}) {
-  console.log(total, credit);
   const max = credit;
-  const spend = credit - total;
+  const spend = total;
   const percent = (spend / max) * 100;
   let outerContainerPercent = 0;
 
-  let innerContainerPercent = (70 * percent) / 100;
-  if (spend >= max) {
+  let innerContainerPercent = (10 * percent) / 100;
+  if (spend > max) {
     innerContainerPercent = 70;
     outerContainerPercent = 20;
   }
@@ -46,14 +45,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: '100%',
     height: 20,
-    borderRadius: 20,
+    // borderRadius: 20,
     flexDirection: 'row',
   },
   innerContainer: {
     backgroundColor: 'cyan',
     width: '70%',
     height: 17,
-    borderRadius: 10,
+    // borderRadius: 10,
     flexDirection: 'row',
   },
   border: {
@@ -78,8 +77,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#EA4C46',
     width: '40%',
     height: 17,
-    borderRadius: 10,
+    // borderRadius: 10,
     // position: 'absolute',
-    left: -20,
+    // left: -20,
   },
 });

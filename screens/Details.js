@@ -1,20 +1,54 @@
-import {View, Text, StyleSheet} from 'react-native';
-import React from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useContext} from 'react';
 import {date} from '../src/Function';
+import {Models} from '../src/Model/FirebaseModel';
+import {UserContext} from '../App';
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export default function Details({route}) {
-  const data = route.params;
+export default function Details({route, navigation}) {
+  const {data, index} = route.params;
 
+  const {user, totalSum, credit} = useContext(UserContext);
   const date = new Date(data.date);
-  //   console.log(`${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
+  //
   const calenderDate = `${date.getDate()}-${
     date.getMonth() + 1
   }-${date.getFullYear()}`;
 
-  // console.log(data, 'datata');
+  const deleteHandler = () => {
+    if (data.paymentType === 'debit') {
+      Models.totalData.deleteData(
+        user.uid,
+        calenderDate,
+        data.category,
+        data.date,
+      );
+      Models.recentData.deleteRecent(user.uid, index);
+    } else {
+      Models.totalData.deleteData(
+        user.uid,
+        calenderDate,
+        data.paymentType,
+        data.date,
+      );
+      Models.recentData.deleteRecent(user.uid, index);
+    }
+
+    const newSum =
+      data.paymentType === 'debit'
+        ? parseInt(totalSum) - parseInt(data.spendings)
+        : parseInt(totalSum);
+
+    const newCredit =
+      data.paymentType === 'credit'
+        ? parseInt(credit) - parseInt(data.spendings)
+        : parseInt(credit);
+
+    Models.totalData.addAmountData(user.uid, {newSum, newCredit});
+    navigation.goBack();
+  };
   return (
     <View style={styles.container}>
       <Text
@@ -37,7 +71,6 @@ export default function Details({route}) {
           padding: 10,
         }}>
         {Object.keys(data).map(item => {
-          console.log(data[item]);
           return (
             <View>
               {item === 'spendings' && data['paymentType'] === 'credit' ? (
@@ -57,6 +90,22 @@ export default function Details({route}) {
             </View>
           );
         })}
+
+        <TouchableOpacity
+          onPress={() => {
+            deleteHandler();
+          }}>
+          <View
+            style={{
+              ...styles.button,
+
+              // backgroundColor: '#42224A',
+              borderRadius: 0,
+              marginTop: 50,
+            }}>
+            <Text style={{alignSelf: 'center'}}> Delete</Text>
+          </View>
+        </TouchableOpacity>
         {/* <View>
           <Text style={{fontWeight: '500', fontSize: 20}}>Category</Text>
           <Text>{data.category}</Text>
@@ -84,5 +133,17 @@ const styles = StyleSheet.create({
   },
   inputbox2: {
     flex: 0.25,
+  },
+  button: {
+    borderWidth: 2,
+    // borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 100,
+    marginHorizontal: 10,
+    //   backgroundColor: 'black',
+    marginTop: 10,
+    // padding: 20,
+    backgroundColor: 'red',
+    borderRadius: 10,
   },
 });

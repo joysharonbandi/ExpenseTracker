@@ -2,7 +2,7 @@ import {View, Text, FlatList} from 'react-native';
 import React, {useEffect, useState} from 'react';
 
 export default function Test({blue}) {
-  // console.log({blue});
+  //
   const [data, setData] = useState([]);
   useEffect(() => {
     setData([
@@ -10,7 +10,7 @@ export default function Test({blue}) {
       {color: '#F07470', height: blue[1]},
       {color: 'yellow', height: blue[2]},
       {color: 'lightgreen', height: blue[3]},
-      // console.log({blue}),
+      //
       // {color: 'violet', height: blue[4]},
     ]);
   }, [blue]);

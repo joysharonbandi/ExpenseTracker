@@ -4,7 +4,7 @@ import Test from './test';
 import {yAxis1} from '../../Function';
 import {dates} from '../../Function';
 export default function Graph({everyDayDetails}) {
-  // console.log(JSON.stringify(everyDayDetails), 'kkkk');
+  //
   const [yAxis, setYaxis] = useState([]);
   const [heights, setHeights] = useState([
     ['50%', '20%', '30%', '40%'],
@@ -13,20 +13,20 @@ export default function Graph({everyDayDetails}) {
     ['100%', '20%', '30%', '40%'],
   ]);
 
-  // console.log('hii', everyDayDetails.array['data']);
+  //
   const highestAmount1 = () => {
     let max = 0;
     for (i = 0; i <= everyDayDetails.array['data'].length - 1; i++) {
       if (Math.max(...everyDayDetails.array['data'][i]) > max) {
         max = Math.max(...everyDayDetails.array['data'][i]);
       }
-      // console.log(Math.max(...everyDayDetails.array['data'][i]));
+      //
     }
     return max;
   };
   useEffect(() => {
     let highestAmount = everyDayDetails.highestAmount;
-    // console.log('joy', highestAmount1());
+    //
 
     // let highestAmount =highestAmount1()
     let tempList = [];
@@ -35,7 +35,7 @@ export default function Graph({everyDayDetails}) {
     let highestPoint = yAxis1(a)['highestPoint'];
     let diff = yAxis1(a)['diff'];
 
-    // console.log(everyDayDetails.array['data'].length);
+    //
     for (i = 0; i <= everyDayDetails.array['data'].length - 1; i++) {
       let t = [];
       for (j = 0; j <= everyDayDetails.array['data'][i].length - 1; j++) {

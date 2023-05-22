@@ -15,10 +15,15 @@ export default function App() {
   const [graphData, setGraph] = useState('');
   const [totalSum, setTotal] = useState(0);
   const [credit, setCredit] = useState(0);
-
+  const [email, setEmail1] = useState('');
+  const [user, setUser] = useState('');
   return (
     <UserContext.Provider
       value={{
+        email,
+        setEmail1,
+        user,
+        setUser,
         credit,
         setCredit,
         totalSum,

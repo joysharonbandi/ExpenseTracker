@@ -4,41 +4,184 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  ScrollView,
+  Image,
 } from 'react-native';
 import React, {useEffect, useMemo, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
 import {useContext} from 'react';
 import {UserContext} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import database from '@react-native-firebase/database';
+import {Models} from '../src/Model/FirebaseModel';
 
-function DropDown({text, selectedValue, arr = [], onchange}) {
+function DropDown({
+  text,
+  selectedValue,
+  arr = [],
+  onchange,
+  initialValue,
+  user,
+  type,
+}) {
+  const [value, setValue] = useState('');
+  const [visable, setVisable] = useState(false);
+  const [categoryVisable, setcategoryVisable] = useState(false);
+  const [input, setInput] = useState('');
+  const [array, setArr] = useState([]);
+  // let tempArr = [...arr];
+
+  const getCategories = async () => {
+    await database()
+      .ref(user.uid + '/' + 'categories')
+      .on('value', snapshot => {
+        {
+          // setObj(snapshot.val());
+          console.log(snapshot.val(), 'kkk');
+          if (snapshot.val()) {
+            setArr(prev => {
+              return [...arr, ...Object.values(snapshot.val())];
+            });
+          }
+
+          return snapshot.val();
+        }
+      });
+  };
+
+  console.log(type);
+
+  useEffect(() => {
+    const fun = async () => {
+      getCategories();
+    };
+    if (type !== 'payment') {
+      fun();
+    } else {
+      setArr(arr);
+    }
+  }, []);
+  console.log(array);
   return (
-    <View style={{borderBottomWidth: 2}}>
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: '500',
-        }}>
-        {text}
-      </Text>
-      <Picker
-        selectedValue={selectedValue}
-        style={{height: 50, width: '100%'}}
-        enabled={true}
-        mode={'dropdown'}
-        onValueChange={(itemValue, itemIndex) => onchange(itemValue)}>
-        {arr.map(item => (
-          <Picker.Item label={item.label} value={item.value} />
-        ))}
-        {/* <Picker.Item label="Credit" value="credit" />
-        <Picker.Item label="Debit" value="debit" /> */}
-      </Picker>
-    </View>
+    <>
+      <View style={{borderBottomWidth: 2}}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+          }}>
+          {text}
+        </Text>
+        <TouchableOpacity
+          style={{width: '100%'}}
+          onPress={() => {
+            setVisable(!visable);
+            setcategoryVisable(false);
+          }}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+          <Text style={{fontSize: 20, fontWeight: '500'}}>
+            {value.label || value}
+          </Text>
+          <Image
+            source={require('../assests/drop-down.png')}
+            style={{width: 20, height: 20}}
+          />
+        </TouchableOpacity>
+
+        {/* <Picker
+          selectedValue={selectedValue}
+          style={{height: 50, width: '100%'}}
+          enabled={true}
+          mode={'dropdown'}
+          onValueChange={(itemValue, itemIndex) => onchange(itemValue)}>
+          {arr.map(item => (
+            <Picker.Item label={item.label} value={item.value} />
+          ))}
+
+          <View
+            style={{backgroundColor: 'red', position: 'absolute', bottom: 0}}>
+            <Text>Add Picker</Text>
+          </View>
+        </Picker> */}
+      </View>
+      {visable && (
+        <View style={{width: '100%', backgroundColor: 'grey', height: 150}}>
+          {type !== 'payment' && (
+            <TouchableOpacity
+              onPress={() => {
+                setcategoryVisable(true);
+              }}>
+              <Text style={{fontSize: 18}}>Add Category+</Text>
+            </TouchableOpacity>
+          )}
+          {categoryVisable && (
+            <View style={{marginHorizontal: 10}}>
+              <TextInput
+                style={{borderBottomWidth: 2, width: '100%', color: 'black'}}
+                placeholder="Add New Category"
+                onChangeText={val => {
+                  setInput(val);
+                }}></TextInput>
+              <TouchableOpacity
+                onPress={() => {
+                  console.log('inside');
+
+                  Models.totalData.addCategory(user.uid, input);
+                  setcategoryVisable(false);
+                }}
+                // disabled={validator()}
+                style={{
+                  marginTop: 20,
+                  padding: 15,
+                  backgroundColor: 'lightcyan',
+                  borderRadius: 10,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  // opacity: validator() ? 0.2 : 1,
+                }}>
+                <Text>Add Category</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <ScrollView>
+            {array.map(item => (
+              <TouchableOpacity
+                style={{
+                  justifyContent: 'center',
+                  marginBottom: 10,
+                }}
+                onPress={() => {
+                  setValue(item);
+                  onchange(item.value || item);
+                  setVisable(false);
+                }}>
+                <Text style={{fontSize: 18}}>{item.label || item}</Text>
+              </TouchableOpacity>
+              // <Picker.Item label={item.label} value={item.value} />
+            ))}
+          </ScrollView>
+        </View>
+      )}
+    </>
   );
 }
 export default function AddExpense({navigation}) {
-  const {obj, setObj, recent, setRecent, setTotal, credit, setCredit} =
-    useContext(UserContext);
+  const {
+    obj,
+    setObj,
+    recent,
+    setRecent,
+    setTotal,
+    credit,
+    setCredit,
+    user,
+    totalSum,
+  } = useContext(UserContext);
 
   const [selectedValue, setSelectedValue] = useState('grocery');
   const [paymentType, setPaymentType] = useState('credit');
@@ -51,75 +194,81 @@ export default function AddExpense({navigation}) {
       return false;
     }
   };
-  console.log(validator());
-  const totalSum = useMemo(async () => {
-    const totalAmount = await AsyncStorage.getItem('totalAmount');
 
-    if (totalAmount === null) {
-      return 0;
-    }
+  // const totalSum = useMemo(async () => {
+  //   const totalAmount = await AsyncStorage.getItem('totalAmount');
 
-    const parsedObj = JSON.parse(totalAmount);
+  //   if (totalAmount === null) {
+  //     return 0;
+  //   }
 
-    return parsedObj;
-  }, []);
+  //   const parsedObj = JSON.parse(totalAmount);
 
-  useEffect(() => {
-    console.log(
-      totalSum.then(e => {
-        console.log(e, 'jjjj');
-      }),
-    );
-  }, []);
+  //   return parsedObj;
+  // }, []);
 
   const Submit = async () => {
-    console.log('inside');
     const d = new Date();
-    const key = d.getDate() + '-' + d.getMonth() + '-' + d.getFullYear();
+    const key =
+      d.getDate() + '-' + (Number(d.getMonth()) + 1) + '-' + d.getFullYear();
 
     // const key = '5 - 7 - 2022';
-    if (obj[[key]] === undefined) {
-      obj[[key]] = {};
-    }
-    console.log(await totalSum, 'awiat ');
+    // if (obj[[key]] === undefined) {
+    //   obj[[key]] = {};
+    // }
+    //
 
     const newSum =
-      paymentType === 'credit'
-        ? parseInt(await totalSum) + parseInt(input1)
-        : parseInt(await totalSum, 10) - parseInt(input1, 10);
+      paymentType === 'debit'
+        ? parseInt(totalSum || 0) + parseInt(input1)
+        : parseInt(totalSum || 0);
 
     const newCredit =
       paymentType === 'credit'
-        ? parseInt(credit) + parseInt(input1)
+        ? parseInt(credit || 0) + parseInt(input1)
         : parseInt(credit);
 
     setTotal(newSum);
     setCredit(newCredit);
+    Models.totalData.addAmountData(user.uid, {newSum, newCredit});
 
-    const category = obj[[key]];
-    const str = new Date();
+    // const category = obj[[key]];
+    const date = new Date();
+    const str = date.getTime();
 
-    console.log(obj, 'obj print');
+    //
+    // if (paymentType === 'credit') {
+    // } else if (category[[selectedValue]] == undefined) {
+    //
+    //   category[[selectedValue]] = {};
+    // }
+    // let obj1 = {};
+    // if (paymentType === 'debit') {
+    //
+    //   obj1 = category[[selectedValue]];
+    // } else {
+    //   obj1 = paymentType;
+    // }
+    //
+    // Object.assign(obj1, {[str]: [input, input1]});
+
+    // setObj({...obj});
     if (paymentType === 'credit') {
-    } else if (category[[selectedValue]] == undefined) {
-      console.log('inside 2nd');
-      category[[selectedValue]] = {};
-    }
-    let obj1 = {};
-    if (paymentType === 'debit') {
-      console.log(obj1, 'inside');
-      obj1 = category[[selectedValue]];
+      Models.totalData.addTotalData(user.uid, key, paymentType, str, [
+        input,
+        input1,
+      ]);
     } else {
-      obj1 = paymentType;
+      Models.totalData.addTotalData(user.uid, key, selectedValue, str, [
+        input,
+        input1,
+      ]);
     }
-    console.log(obj1, 'obj1');
-    Object.assign(obj1, {[str]: [input, input1]});
 
-    setObj({...obj});
     paymentType === 'debit'
       ? setRecent(
           [
-            ...recent,
+            ...(recent || []),
             {
               category: selectedValue,
               description: input,
@@ -132,7 +281,7 @@ export default function AddExpense({navigation}) {
         )
       : setRecent(
           [
-            ...recent,
+            ...(recent || []),
             {
               paymentType: paymentType,
               description: input,
@@ -142,37 +291,29 @@ export default function AddExpense({navigation}) {
           ],
           newSum,
         );
+
     paymentType === 'debit'
-      ? storeData(
-          obj,
-          [
-            ...recent,
-            {
-              category: selectedValue,
-              description: input,
-              spendings: input1,
-              date: str,
-              paymentType: paymentType,
-            },
-          ],
-          newSum,
-          newCredit,
-        )
-      : storeData(
-          obj,
-          [
-            ...recent,
-            {
-              paymentType: paymentType,
-              description: input,
-              spendings: input1,
-              date: str,
-            },
-          ],
-          newSum,
-          newCredit,
-        );
-    navigation.goBack();
+      ? Models.recentData.addTransaction(user.uid, [
+          ...(recent || []),
+          {
+            paymentType: paymentType,
+            description: input,
+            spendings: input1,
+            date: str,
+            category: selectedValue,
+          },
+        ])
+      : Models.recentData.addTransaction(user.uid, [
+          ...(recent || []),
+          {
+            paymentType: paymentType,
+            description: input,
+            spendings: input1,
+            date: str,
+          },
+        ]);
+
+    navigation.navigate('Home');
   };
 
   const storeData = async (obj, recent, totalSum, credit) => {
@@ -190,7 +331,6 @@ export default function AddExpense({navigation}) {
       // AsyncStorage.setItem('@storage_Key1', jsonValue1);
     } catch (e) {
       // saving error
-      console.log(e);
     }
   };
 
@@ -231,11 +371,14 @@ export default function AddExpense({navigation}) {
             {value: 'debit', label: 'Debit'},
           ]}
           selectedValue={paymentType}
+          user={user}
+          type={'payment'}
         />
         {paymentType === 'debit' && (
           <DropDown
             text="Category"
             onchange={e => {
+              console.log(e, 'aa');
               setSelectedValue(e);
             }}
             arr={[
@@ -245,6 +388,7 @@ export default function AddExpense({navigation}) {
               {label: 'Travel', value: 'Travel'},
             ]}
             selectedValue={selectedValue}
+            user={user}
           />
         )}
         <Text
@@ -257,7 +401,7 @@ export default function AddExpense({navigation}) {
           description
         </Text>
         <TextInput
-          style={{borderBottomWidth: 2, width: '100%'}}
+          style={{borderBottomWidth: 2, width: '100%', color: 'black'}}
           placeholder="description"
           onChangeText={val => {
             setInput(val);
@@ -273,7 +417,7 @@ export default function AddExpense({navigation}) {
         </Text>
         <TextInput
           keyboardType="numeric"
-          style={{borderBottomWidth: 2, width: '100%'}}
+          style={{borderBottomWidth: 2, width: '100%', color: 'black'}}
           placeholder="Enter Money"
           onChangeText={val => {
             setInput1(val);

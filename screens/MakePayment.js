@@ -31,7 +31,7 @@ export default function MakePayment({navigation}) {
     }
 
     const k = obj[[selectedValue]];
-    // console.log('ji', obj[[selectedValue]]);
+    //
     const obj1 = {};
 
     const str =
@@ -43,7 +43,7 @@ export default function MakePayment({navigation}) {
       +'-' +
       d.getSeconds() +
       '-';
-    // console.log(
+    //
     //   d.getDate() +
     //     '-' +
     //     d.getHours() +
@@ -56,15 +56,14 @@ export default function MakePayment({navigation}) {
 
     // k[[str]] = [input, input1];
     // obj[[selectedValue]][str] = [input, input1];
-    // console.log(obj);
+    //
     // setObj({...obj, selectedValue:{...prevState.selectedValue,str:{
     //   ...p
     // }}});
     // obj1[str] = [input, input1];
     Object.assign(k, {[str]: [input, input1]});
-    console.log(k);
+
     setObj({...obj});
-    console.log(obj1);
 
     // setObj(prev => ({
     //   ...prev,
@@ -77,17 +76,15 @@ export default function MakePayment({navigation}) {
     //   },
     // }));
   };
-  console.log(obj);
 
   const storeData = async obj => {
     try {
       const jsonValue = JSON.stringify(obj);
-      // console.log('aa', jsonValue);
+      //
       AsyncStorage.setItem('@storage_Key', jsonValue);
       // AsyncStorage.setItem('@storage_Key1', jsonValue1);
     } catch (e) {
       // saving error
-      console.log(e);
     }
   };
 
@@ -97,8 +94,6 @@ export default function MakePayment({navigation}) {
     }
   }, [obj]);
   const onSuccess = e => {
-    console.log('jjjjj', e.data.split('&mc'));
-    console.log('hiii ${input1}');
     if (input1 == 0 || input == '') {
       setReactiv(true);
       Alert.alert('Every field should be filled');
@@ -106,20 +101,20 @@ export default function MakePayment({navigation}) {
       var url =
         'paytmmp://' +
         'pay?pa=7013991532@paytm&mc=0000&tr=123456789ABCDEFG&tn=HelloWorld&am=1&cu=INR';
-      console.log(e.data);
+
       // Linking.openURL(e.data + `&am=${input1}&cu=INR`).catch(
       //   err => console.error('An error occured', err),
       //   Submit(),
       // );
-      // Linking.openURL(url).then(e => console.log(e));
+      // Linking.openURL(url).then(e =>
       //
     }
   };
-  // console.log(reactiv.reactivate());
+  //
   // useEffect(() => {
   //   if (reactiv) {
   //     reactiv.reactivate();
-  //     console.log(reactiv);
+  //
   //   }
   // }, [reactiv]);
 
@@ -131,10 +126,7 @@ export default function MakePayment({navigation}) {
         1 +
         '&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp';
       let response = await UPI.openLink(UpiUrl);
-      console.log(response); //however you want to handle response
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
   return (
     <View style={{flex: 1, backgroundColor: '#42224A'}}>

@@ -36,7 +36,7 @@ export default function TotalDetails({route}) {
               Total Expenses:
             </Text>
 
-            <Text style={styles.text}>{credit - totalSum}</Text>
+            <Text style={styles.text}>{totalSum}</Text>
           </View>
         </View>
         <View style={styles.line} />
@@ -45,7 +45,7 @@ export default function TotalDetails({route}) {
             Total Available:
           </Text>
 
-          <Text style={styles.text}>{totalSum}</Text>
+          <Text style={styles.text}>{credit - totalSum}</Text>
         </View>
       </View>
     </View>

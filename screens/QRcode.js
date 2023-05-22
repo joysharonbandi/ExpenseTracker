@@ -7,14 +7,13 @@ import {UserContext} from '../App';
 import {style} from 'deprecated-react-native-prop-types/DeprecatedTextPropTypes';
 export default function QRcode({route, navigation}) {
   const UPI = NativeModules.UPI;
-  console.log(route.params);
+
   const [reactiv, setReactiv] = useState();
   const [res, setRes] = useState('');
   const {obj, setObj, input1, setInput1, input, setInput} =
     useContext(UserContext);
-  console.log(input, input1);
+
   const openLink = async e => {
-    console.log(e.data);
     // let {amount} = this.state;
     try {
       let UpiUrl =
@@ -22,18 +21,15 @@ export default function QRcode({route, navigation}) {
         1 +
         '&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp';
       let response = await UPI.openLink(e.data);
-      console.log(response);
-      console.log(response.split('&Status'));
+
       let res = response.split('&Status');
-      console.log(res);
+
       if (res[1] == '=SUCCESS' || res[1] == '=FAILURE') {
         navigation.navigate('PaymentDetails', {obj: route.params});
       }
 
       //however you want to handle response
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   return (
@@ -43,7 +39,7 @@ export default function QRcode({route, navigation}) {
         reactivateTimeout={1}
         showMarker
         ref={node => {
-          // console.log(node.reactivate(), 'kkii')
+          //
           setReactiv(node);
         }}
         reactivate={true}
